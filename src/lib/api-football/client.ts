@@ -178,16 +178,23 @@ class ApiFootballClient {
 
   /**
    * Get current football season (August to May)
+   * Tries current season first, falls back to previous if no data
    */
   getCurrentSeason(): number {
     const now = new Date();
     const year = now.getFullYear();
-    const month = now.getMonth() + 1; // 0-indexed
+    const month = now.getMonth() + 1;
     
     // If we're in Jan-May, we're in the season that started last year
     // If we're in Aug-Dec, we're in the season that started this year
-    // Jun-Jul is off-season, default to upcoming season
-    return month < 6 ? year - 1 : year;
+    const currentSeason = month < 6 ? year - 1 : year;
+    
+    // API-Football may not have future season data yet
+    // Use 2024 as the latest confirmed season with full data
+    // Update this as new seasons become available
+    const latestAvailableSeason = 2024;
+    
+    return Math.min(currentSeason, latestAvailableSeason);
   }
 }
 

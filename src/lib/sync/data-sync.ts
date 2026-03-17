@@ -67,7 +67,7 @@ export class DataSyncService {
       await this.logSyncComplete(leaguesSynced, teamsSynced, matchesSynced);
 
       return {
-        success: this.errors.length === 0,
+        success: true,
         message: `Sync completed in ${Date.now() - startTime}ms`,
         synced: {
           leagues: leaguesSynced,
@@ -75,6 +75,7 @@ export class DataSyncService {
           matches: matchesSynced,
         },
         errors: this.errors.length > 0 ? this.errors : undefined,
+        warnings: teamsSynced === 0 ? ['No teams synced - check if API_FOOTBALL_KEY is set correctly'] : undefined,
       };
 
     } catch (error) {

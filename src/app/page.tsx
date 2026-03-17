@@ -9,7 +9,7 @@ import {
   ArrowRight,
   BarChart3,
   Target,
-  Clock
+  RefreshCw
 } from 'lucide-react';
 import Link from 'next/link';
 import { StatsCard } from '@/components/ui/StatsCard';
@@ -17,310 +17,45 @@ import { MatchCard } from '@/components/ui/MatchCard';
 import { ValueBetCard } from '@/components/ui/ValueBetCard';
 import { MatchWithTeams, ValueBet } from '@/types/database';
 
-// Demo data for showcase
-const DEMO_MATCHES: MatchWithTeams[] = [
-  {
-    id: 1,
-    league_id: 39,
-    season: 2025,
-    round: 'Regular Season - 30',
-    home_team_id: 33,
-    away_team_id: 34,
-    match_date: new Date(Date.now() + 86400000).toISOString(),
-    match_timestamp: Math.floor(Date.now() / 1000) + 86400,
-    venue: 'Old Trafford',
-    city: 'Manchester',
-    status: 'NS',
-    status_elapsed: null,
-    home_score: null,
-    away_score: null,
-    home_halftime_score: null,
-    away_halftime_score: null,
-    home_fulltime_score: null,
-    away_fulltime_score: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    home_team: {
-      id: 33,
-      name: 'Manchester United',
-      code: 'MUN',
-      country: 'England',
-      logo: 'https://media.api-sports.io/football/teams/33.png',
-      founded: 1878,
-      venue_name: 'Old Trafford',
-      venue_city: 'Manchester',
-      venue_capacity: 76212,
-      created_at: '',
-      updated_at: '',
-    },
-    away_team: {
-      id: 34,
-      name: 'Newcastle',
-      code: 'NEW',
-      country: 'England',
-      logo: 'https://media.api-sports.io/football/teams/34.png',
-      founded: 1892,
-      venue_name: "St. James' Park",
-      venue_city: 'Newcastle upon Tyne',
-      venue_capacity: 52305,
-      created_at: '',
-      updated_at: '',
-    },
-    league: {
-      id: 39,
-      name: 'Premier League',
-      country: 'England',
-      logo: 'https://media.api-sports.io/football/leagues/39.png',
-      flag: 'https://media.api-sports.io/flags/gb.svg',
-      season: 2025,
-      created_at: '',
-      updated_at: '',
-    },
-    prediction: {
-      id: '1',
-      match_id: 1,
-      home_win_prob: 0.42,
-      draw_prob: 0.28,
-      away_win_prob: 0.30,
-      over_2_5_prob: 0.58,
-      under_2_5_prob: 0.42,
-      btts_yes_prob: 0.62,
-      btts_no_prob: 0.38,
-      predicted_home_goals: 1.6,
-      predicted_away_goals: 1.2,
-      confidence_score: 0.78,
-      model_version: 'v1.0',
-      created_at: '',
-      updated_at: '',
-    },
-  },
-  {
-    id: 2,
-    league_id: 39,
-    season: 2025,
-    round: 'Regular Season - 30',
-    home_team_id: 40,
-    away_team_id: 49,
-    match_date: new Date(Date.now() + 172800000).toISOString(),
-    match_timestamp: Math.floor(Date.now() / 1000) + 172800,
-    venue: 'Anfield',
-    city: 'Liverpool',
-    status: 'NS',
-    status_elapsed: null,
-    home_score: null,
-    away_score: null,
-    home_halftime_score: null,
-    away_halftime_score: null,
-    home_fulltime_score: null,
-    away_fulltime_score: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    home_team: {
-      id: 40,
-      name: 'Liverpool',
-      code: 'LIV',
-      country: 'England',
-      logo: 'https://media.api-sports.io/football/teams/40.png',
-      founded: 1892,
-      venue_name: 'Anfield',
-      venue_city: 'Liverpool',
-      venue_capacity: 55212,
-      created_at: '',
-      updated_at: '',
-    },
-    away_team: {
-      id: 49,
-      name: 'Chelsea',
-      code: 'CHE',
-      country: 'England',
-      logo: 'https://media.api-sports.io/football/teams/49.png',
-      founded: 1905,
-      venue_name: 'Stamford Bridge',
-      venue_city: 'London',
-      venue_capacity: 40834,
-      created_at: '',
-      updated_at: '',
-    },
-    league: {
-      id: 39,
-      name: 'Premier League',
-      country: 'England',
-      logo: 'https://media.api-sports.io/football/leagues/39.png',
-      flag: 'https://media.api-sports.io/flags/gb.svg',
-      season: 2025,
-      created_at: '',
-      updated_at: '',
-    },
-    prediction: {
-      id: '2',
-      match_id: 2,
-      home_win_prob: 0.55,
-      draw_prob: 0.24,
-      away_win_prob: 0.21,
-      over_2_5_prob: 0.65,
-      under_2_5_prob: 0.35,
-      btts_yes_prob: 0.58,
-      btts_no_prob: 0.42,
-      predicted_home_goals: 2.1,
-      predicted_away_goals: 1.1,
-      confidence_score: 0.82,
-      model_version: 'v1.0',
-      created_at: '',
-      updated_at: '',
-    },
-  },
-  {
-    id: 3,
-    league_id: 40,
-    season: 2025,
-    round: 'Regular Season - 38',
-    home_team_id: 63,
-    away_team_id: 64,
-    match_date: new Date(Date.now() + 259200000).toISOString(),
-    match_timestamp: Math.floor(Date.now() / 1000) + 259200,
-    venue: 'Elland Road',
-    city: 'Leeds',
-    status: 'NS',
-    status_elapsed: null,
-    home_score: null,
-    away_score: null,
-    home_halftime_score: null,
-    away_halftime_score: null,
-    home_fulltime_score: null,
-    away_fulltime_score: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    home_team: {
-      id: 63,
-      name: 'Leeds United',
-      code: 'LEE',
-      country: 'England',
-      logo: 'https://media.api-sports.io/football/teams/63.png',
-      founded: 1919,
-      venue_name: 'Elland Road',
-      venue_city: 'Leeds',
-      venue_capacity: 37890,
-      created_at: '',
-      updated_at: '',
-    },
-    away_team: {
-      id: 64,
-      name: 'Sunderland',
-      code: 'SUN',
-      country: 'England',
-      logo: 'https://media.api-sports.io/football/teams/71.png',
-      founded: 1879,
-      venue_name: 'Stadium of Light',
-      venue_city: 'Sunderland',
-      venue_capacity: 49000,
-      created_at: '',
-      updated_at: '',
-    },
-    league: {
-      id: 40,
-      name: 'Championship',
-      country: 'England',
-      logo: 'https://media.api-sports.io/football/leagues/40.png',
-      flag: 'https://media.api-sports.io/flags/gb.svg',
-      season: 2025,
-      created_at: '',
-      updated_at: '',
-    },
-    prediction: {
-      id: '3',
-      match_id: 3,
-      home_win_prob: 0.48,
-      draw_prob: 0.26,
-      away_win_prob: 0.26,
-      over_2_5_prob: 0.52,
-      under_2_5_prob: 0.48,
-      btts_yes_prob: 0.55,
-      btts_no_prob: 0.45,
-      predicted_home_goals: 1.5,
-      predicted_away_goals: 1.1,
-      confidence_score: 0.71,
-      model_version: 'v1.0',
-      created_at: '',
-      updated_at: '',
-    },
-  },
-];
-
-const DEMO_VALUE_BETS: (ValueBet & { match?: any })[] = [
-  {
-    id: '1',
-    match_id: 1,
-    bet_type: 'over_2_5',
-    calculated_prob: 0.58,
-    bookmaker_odds: 1.95,
-    implied_prob: 0.513,
-    edge_percentage: 13.1,
-    expected_value: 0.131,
-    kelly_stake: 0.034,
-    confidence: 'high',
-    is_value: true,
-    created_at: new Date().toISOString(),
-    match: {
-      id: 1,
-      match_date: new Date(Date.now() + 86400000).toISOString(),
-      home_team: { name: 'Manchester United', logo: 'https://media.api-sports.io/football/teams/33.png' },
-      away_team: { name: 'Newcastle', logo: 'https://media.api-sports.io/football/teams/34.png' },
-      league: { name: 'Premier League', logo: 'https://media.api-sports.io/football/leagues/39.png' },
-    },
-  },
-  {
-    id: '2',
-    match_id: 2,
-    bet_type: 'home_win',
-    calculated_prob: 0.55,
-    bookmaker_odds: 2.10,
-    implied_prob: 0.476,
-    edge_percentage: 15.5,
-    expected_value: 0.155,
-    kelly_stake: 0.041,
-    confidence: 'high',
-    is_value: true,
-    created_at: new Date().toISOString(),
-    match: {
-      id: 2,
-      match_date: new Date(Date.now() + 172800000).toISOString(),
-      home_team: { name: 'Liverpool', logo: 'https://media.api-sports.io/football/teams/40.png' },
-      away_team: { name: 'Chelsea', logo: 'https://media.api-sports.io/football/teams/49.png' },
-      league: { name: 'Premier League', logo: 'https://media.api-sports.io/football/leagues/39.png' },
-    },
-  },
-  {
-    id: '3',
-    match_id: 3,
-    bet_type: 'btts_yes',
-    calculated_prob: 0.55,
-    bookmaker_odds: 1.85,
-    implied_prob: 0.541,
-    edge_percentage: 1.8,
-    expected_value: 0.018,
-    kelly_stake: 0.012,
-    confidence: 'medium',
-    is_value: true,
-    created_at: new Date().toISOString(),
-    match: {
-      id: 3,
-      match_date: new Date(Date.now() + 259200000).toISOString(),
-      home_team: { name: 'Leeds United', logo: 'https://media.api-sports.io/football/teams/63.png' },
-      away_team: { name: 'Sunderland', logo: 'https://media.api-sports.io/football/teams/71.png' },
-      league: { name: 'Championship', logo: 'https://media.api-sports.io/football/leagues/40.png' },
-    },
-  },
-];
-
 export default function Dashboard() {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [matches, setMatches] = useState<MatchWithTeams[]>([]);
+  const [valueBets, setValueBets] = useState<(ValueBet & { match?: any })[]>([]);
+  const [stats, setStats] = useState({ matches: 0, valueBets: 0, leagues: 4 });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoaded(true);
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch upcoming fixtures
+        const fixturesRes = await fetch('/api/fixtures?status=upcoming&limit=6');
+        const fixturesData = await fixturesRes.json();
+        
+        if (fixturesData.success) {
+          setMatches(fixturesData.fixtures);
+          setStats(prev => ({ ...prev, matches: fixturesData.count }));
+        }
+
+        // Fetch value bets
+        const valueBetsRes = await fetch('/api/value-bets?limit=4');
+        const valueBetsData = await valueBetsRes.json();
+        
+        if (valueBetsData.success) {
+          setValueBets(valueBetsData.valueBets);
+          setStats(prev => ({ ...prev, valueBets: valueBetsData.count }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   return (
-    <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${isLoaded ? 'animate-fade-in-up' : 'opacity-0'}`}>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-up">
       {/* Hero Section */}
       <div className="mb-12">
         <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
@@ -337,19 +72,18 @@ export default function Dashboard() {
       {/* Stats Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 stagger-children">
         <StatsCard
-          title="Upcoming Matches"
-          value="47"
-          subtitle="Next 7 days"
+          title="Total Matches"
+          value={isLoading ? '...' : stats.matches}
+          subtitle="In database"
           icon={Calendar}
           variant="primary"
         />
         <StatsCard
           title="Value Bets Found"
-          value="12"
+          value={isLoading ? '...' : stats.valueBets}
           subtitle="Above 5% edge"
           icon={Zap}
           variant="secondary"
-          trend={{ value: 23, isPositive: true }}
         />
         <StatsCard
           title="Prediction Accuracy"
@@ -360,7 +94,7 @@ export default function Dashboard() {
         />
         <StatsCard
           title="Leagues Tracked"
-          value="4"
+          value={stats.leagues}
           subtitle="English leagues"
           icon={Trophy}
         />
@@ -372,8 +106,8 @@ export default function Dashboard() {
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-display font-bold text-white flex items-center gap-2">
-              <Clock className="w-5 h-5 text-[var(--accent-primary)]" />
-              Upcoming Fixtures
+              <Calendar className="w-5 h-5 text-[var(--accent-primary)]" />
+              Recent Fixtures
             </h2>
             <Link 
               href="/fixtures" 
@@ -382,11 +116,23 @@ export default function Dashboard() {
               View All <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="space-y-4 stagger-children">
-            {DEMO_MATCHES.map((match) => (
-              <MatchCard key={match.id} match={match} />
-            ))}
-          </div>
+          
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <RefreshCw className="w-8 h-8 text-[var(--accent-primary)] animate-spin" />
+            </div>
+          ) : matches.length > 0 ? (
+            <div className="space-y-4">
+              {matches.slice(0, 4).map((match) => (
+                <MatchCard key={match.id} match={match} />
+              ))}
+            </div>
+          ) : (
+            <div className="card p-8 text-center">
+              <Calendar className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-3" />
+              <p className="text-[var(--text-secondary)]">No upcoming fixtures found</p>
+            </div>
+          )}
         </div>
 
         {/* Value Bets Sidebar */}
@@ -403,11 +149,24 @@ export default function Dashboard() {
               View All <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="space-y-4 stagger-children">
-            {DEMO_VALUE_BETS.slice(0, 2).map((vb) => (
-              <ValueBetCard key={vb.id} valueBet={vb} />
-            ))}
-          </div>
+          
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <RefreshCw className="w-8 h-8 text-[var(--accent-primary)] animate-spin" />
+            </div>
+          ) : valueBets.length > 0 ? (
+            <div className="space-y-4">
+              {valueBets.slice(0, 2).map((vb) => (
+                <ValueBetCard key={vb.id} valueBet={vb} />
+              ))}
+            </div>
+          ) : (
+            <div className="card p-8 text-center">
+              <Zap className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-3" />
+              <p className="text-[var(--text-secondary)]">No value bets found yet</p>
+              <p className="text-xs text-[var(--text-muted)] mt-2">Run predictions to generate value bets</p>
+            </div>
+          )}
         </div>
       </div>
 

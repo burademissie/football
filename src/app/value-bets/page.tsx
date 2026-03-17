@@ -1,138 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Zap, Filter, TrendingUp, AlertCircle, Info } from 'lucide-react';
+import { Zap, Filter, AlertCircle, Info, RefreshCw } from 'lucide-react';
 import { ValueBetCard } from '@/components/ui/ValueBetCard';
 import { ValueBet, BetType } from '@/types/database';
-
-const DEMO_VALUE_BETS: (ValueBet & { match?: any })[] = [
-  {
-    id: '1',
-    match_id: 1,
-    bet_type: 'home_win',
-    calculated_prob: 0.55,
-    bookmaker_odds: 2.10,
-    implied_prob: 0.476,
-    edge_percentage: 15.5,
-    expected_value: 0.155,
-    kelly_stake: 0.041,
-    confidence: 'high',
-    is_value: true,
-    created_at: new Date().toISOString(),
-    match: {
-      id: 1,
-      match_date: new Date(Date.now() + 86400000).toISOString(),
-      home_team: { name: 'Liverpool', logo: 'https://media.api-sports.io/football/teams/40.png' },
-      away_team: { name: 'Chelsea', logo: 'https://media.api-sports.io/football/teams/49.png' },
-      league: { name: 'Premier League', logo: 'https://media.api-sports.io/football/leagues/39.png' },
-    },
-  },
-  {
-    id: '2',
-    match_id: 2,
-    bet_type: 'over_2_5',
-    calculated_prob: 0.58,
-    bookmaker_odds: 1.95,
-    implied_prob: 0.513,
-    edge_percentage: 13.1,
-    expected_value: 0.131,
-    kelly_stake: 0.034,
-    confidence: 'high',
-    is_value: true,
-    created_at: new Date().toISOString(),
-    match: {
-      id: 2,
-      match_date: new Date(Date.now() + 172800000).toISOString(),
-      home_team: { name: 'Manchester United', logo: 'https://media.api-sports.io/football/teams/33.png' },
-      away_team: { name: 'Newcastle', logo: 'https://media.api-sports.io/football/teams/34.png' },
-      league: { name: 'Premier League', logo: 'https://media.api-sports.io/football/leagues/39.png' },
-    },
-  },
-  {
-    id: '3',
-    match_id: 3,
-    bet_type: 'btts_yes',
-    calculated_prob: 0.62,
-    bookmaker_odds: 1.80,
-    implied_prob: 0.556,
-    edge_percentage: 11.6,
-    expected_value: 0.116,
-    kelly_stake: 0.032,
-    confidence: 'high',
-    is_value: true,
-    created_at: new Date().toISOString(),
-    match: {
-      id: 3,
-      match_date: new Date(Date.now() + 259200000).toISOString(),
-      home_team: { name: 'Manchester City', logo: 'https://media.api-sports.io/football/teams/50.png' },
-      away_team: { name: 'Tottenham', logo: 'https://media.api-sports.io/football/teams/47.png' },
-      league: { name: 'Premier League', logo: 'https://media.api-sports.io/football/leagues/39.png' },
-    },
-  },
-  {
-    id: '4',
-    match_id: 4,
-    bet_type: 'away_win',
-    calculated_prob: 0.38,
-    bookmaker_odds: 3.20,
-    implied_prob: 0.313,
-    edge_percentage: 21.6,
-    expected_value: 0.216,
-    kelly_stake: 0.048,
-    confidence: 'medium',
-    is_value: true,
-    created_at: new Date().toISOString(),
-    match: {
-      id: 4,
-      match_date: new Date(Date.now() + 345600000).toISOString(),
-      home_team: { name: 'Leeds United', logo: 'https://media.api-sports.io/football/teams/63.png' },
-      away_team: { name: 'Sunderland', logo: 'https://media.api-sports.io/football/teams/71.png' },
-      league: { name: 'Championship', logo: 'https://media.api-sports.io/football/leagues/40.png' },
-    },
-  },
-  {
-    id: '5',
-    match_id: 5,
-    bet_type: 'under_2_5',
-    calculated_prob: 0.52,
-    bookmaker_odds: 2.05,
-    implied_prob: 0.488,
-    edge_percentage: 6.6,
-    expected_value: 0.066,
-    kelly_stake: 0.018,
-    confidence: 'medium',
-    is_value: true,
-    created_at: new Date().toISOString(),
-    match: {
-      id: 5,
-      match_date: new Date(Date.now() + 432000000).toISOString(),
-      home_team: { name: 'Norwich City', logo: 'https://media.api-sports.io/football/teams/68.png' },
-      away_team: { name: 'West Brom', logo: 'https://media.api-sports.io/football/teams/60.png' },
-      league: { name: 'Championship', logo: 'https://media.api-sports.io/football/leagues/40.png' },
-    },
-  },
-  {
-    id: '6',
-    match_id: 6,
-    bet_type: 'draw',
-    calculated_prob: 0.32,
-    bookmaker_odds: 3.60,
-    implied_prob: 0.278,
-    edge_percentage: 15.2,
-    expected_value: 0.152,
-    kelly_stake: 0.035,
-    confidence: 'low',
-    is_value: true,
-    created_at: new Date().toISOString(),
-    match: {
-      id: 6,
-      match_date: new Date(Date.now() + 518400000).toISOString(),
-      home_team: { name: 'MK Dons', logo: 'https://media.api-sports.io/football/teams/1359.png' },
-      away_team: { name: 'Bolton', logo: 'https://media.api-sports.io/football/teams/69.png' },
-      league: { name: 'League One', logo: 'https://media.api-sports.io/football/leagues/41.png' },
-    },
-  },
-];
 
 const BET_TYPE_OPTIONS: { value: BetType | 'all'; label: string }[] = [
   { value: 'all', label: 'All Markets' },
@@ -152,30 +23,51 @@ const CONFIDENCE_OPTIONS = [
 ];
 
 export default function ValueBetsPage() {
+  const [valueBets, setValueBets] = useState<(ValueBet & { match?: any })[]>([]);
   const [betTypeFilter, setBetTypeFilter] = useState<BetType | 'all'>('all');
   const [confidenceFilter, setConfidenceFilter] = useState<string>('all');
   const [minEdge, setMinEdge] = useState<number>(5);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [summary, setSummary] = useState({ totalEV: 0, avgEdge: 0, highConfidence: 0 });
+
+  const fetchValueBets = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const params = new URLSearchParams();
+      params.append('minEdge', String(minEdge));
+      if (betTypeFilter !== 'all') params.append('betType', betTypeFilter);
+      if (confidenceFilter !== 'all') params.append('confidence', confidenceFilter);
+      params.append('limit', '50');
+      
+      const response = await fetch(`/api/value-bets?${params}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setValueBets(data.valueBets);
+        setSummary({
+          totalEV: data.summary?.totalExpectedValue || 0,
+          avgEdge: data.summary?.averageEdge || 0,
+          highConfidence: data.summary?.highConfidence || 0,
+        });
+      } else {
+        setError(data.error || 'Failed to fetch value bets');
+      }
+    } catch (err) {
+      setError('Failed to connect to server');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setIsLoaded(true);
-  }, []);
-
-  const filteredBets = DEMO_VALUE_BETS.filter(bet => {
-    if (betTypeFilter !== 'all' && bet.bet_type !== betTypeFilter) return false;
-    if (confidenceFilter === 'high' && bet.confidence !== 'high') return false;
-    if (confidenceFilter === 'medium' && bet.confidence === 'low') return false;
-    if (bet.edge_percentage < minEdge) return false;
-    return true;
-  });
-
-  const totalExpectedValue = filteredBets.reduce((sum, bet) => sum + bet.expected_value, 0);
-  const avgEdge = filteredBets.length > 0 
-    ? filteredBets.reduce((sum, bet) => sum + bet.edge_percentage, 0) / filteredBets.length 
-    : 0;
+    fetchValueBets();
+  }, [betTypeFilter, confidenceFilter, minEdge]);
 
   return (
-    <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${isLoaded ? 'animate-fade-in-up' : 'opacity-0'}`}>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-up">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-display font-bold text-white flex items-center gap-3">
@@ -205,16 +97,20 @@ export default function ValueBetsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div className="card p-4 text-center">
           <p className="text-sm text-[var(--text-muted)] mb-1">Value Bets Found</p>
-          <p className="text-3xl font-display font-bold text-[var(--accent-primary)]">{filteredBets.length}</p>
+          <p className="text-3xl font-display font-bold text-[var(--accent-primary)]">
+            {isLoading ? '...' : valueBets.length}
+          </p>
         </div>
         <div className="card p-4 text-center">
           <p className="text-sm text-[var(--text-muted)] mb-1">Average Edge</p>
-          <p className="text-3xl font-display font-bold text-white">{avgEdge.toFixed(1)}%</p>
+          <p className="text-3xl font-display font-bold text-white">
+            {isLoading ? '...' : `${summary.avgEdge.toFixed(1)}%`}
+          </p>
         </div>
         <div className="card p-4 text-center">
           <p className="text-sm text-[var(--text-muted)] mb-1">Total Expected Value</p>
           <p className="text-3xl font-display font-bold text-[var(--accent-secondary)]">
-            +{(totalExpectedValue * 100).toFixed(1)}%
+            {isLoading ? '...' : `+${(summary.totalEV * 100).toFixed(1)}%`}
           </p>
         </div>
       </div>
@@ -271,21 +167,42 @@ export default function ValueBetsPage() {
         </div>
       </div>
 
-      {/* Value Bets Grid */}
-      {filteredBets.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
-          {filteredBets
-            .sort((a, b) => b.edge_percentage - a.edge_percentage)
-            .map((bet) => (
-              <ValueBetCard key={bet.id} valueBet={bet} />
-            ))}
+      {/* Error State */}
+      {error && (
+        <div className="card p-6 mb-8 border-[var(--accent-danger)]/30 bg-[var(--accent-danger)]/5">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-[var(--accent-danger)]" />
+            <p className="text-[var(--text-secondary)]">{error}</p>
+          </div>
         </div>
-      ) : (
+      )}
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-16">
+          <RefreshCw className="w-12 h-12 text-[var(--accent-primary)] animate-spin" />
+        </div>
+      )}
+
+      {/* Value Bets Grid */}
+      {!isLoading && !error && valueBets.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {valueBets.map((bet) => (
+            <ValueBetCard key={bet.id} valueBet={bet} />
+          ))}
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!isLoading && !error && valueBets.length === 0 && (
         <div className="text-center py-16">
           <AlertCircle className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
           <h3 className="text-xl font-display font-bold text-white mb-2">No Value Bets Found</h3>
           <p className="text-[var(--text-secondary)]">
-            Try adjusting your filters to see more results.
+            Value bets are generated when predictions are run against bookmaker odds.
+          </p>
+          <p className="text-sm text-[var(--text-muted)] mt-2">
+            Try lowering the minimum edge filter or run the prediction engine.
           </p>
         </div>
       )}

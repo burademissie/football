@@ -1,93 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { TrendingUp, Target, BarChart3, Info } from 'lucide-react';
+import { TrendingUp, Target, BarChart3, Info, RefreshCw, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 import { format } from 'date-fns';
+import { MatchWithTeams } from '@/types/database';
 
-interface PredictionData {
-  id: number;
-  match_date: string;
-  home_team: { name: string; logo: string };
-  away_team: { name: string; logo: string };
-  league: { name: string; logo: string };
-  prediction: {
-    home_win_prob: number;
-    draw_prob: number;
-    away_win_prob: number;
-    over_2_5_prob: number;
-    btts_yes_prob: number;
-    predicted_home_goals: number;
-    predicted_away_goals: number;
-    confidence_score: number;
-  };
-}
+function PredictionRow({ match }: { match: MatchWithTeams }) {
+  const prediction = match.prediction;
+  
+  if (!prediction) {
+    return (
+      <tr>
+        <td colSpan={10} className="py-4 px-4 text-center text-[var(--text-muted)]">
+          No prediction available
+        </td>
+      </tr>
+    );
+  }
 
-const DEMO_PREDICTIONS: PredictionData[] = [
-  {
-    id: 1,
-    match_date: new Date(Date.now() + 86400000).toISOString(),
-    home_team: { name: 'Liverpool', logo: 'https://media.api-sports.io/football/teams/40.png' },
-    away_team: { name: 'Chelsea', logo: 'https://media.api-sports.io/football/teams/49.png' },
-    league: { name: 'Premier League', logo: 'https://media.api-sports.io/football/leagues/39.png' },
-    prediction: {
-      home_win_prob: 0.55, draw_prob: 0.24, away_win_prob: 0.21,
-      over_2_5_prob: 0.65, btts_yes_prob: 0.58,
-      predicted_home_goals: 2.1, predicted_away_goals: 1.1, confidence_score: 0.82,
-    },
-  },
-  {
-    id: 2,
-    match_date: new Date(Date.now() + 172800000).toISOString(),
-    home_team: { name: 'Manchester United', logo: 'https://media.api-sports.io/football/teams/33.png' },
-    away_team: { name: 'Newcastle', logo: 'https://media.api-sports.io/football/teams/34.png' },
-    league: { name: 'Premier League', logo: 'https://media.api-sports.io/football/leagues/39.png' },
-    prediction: {
-      home_win_prob: 0.42, draw_prob: 0.28, away_win_prob: 0.30,
-      over_2_5_prob: 0.58, btts_yes_prob: 0.62,
-      predicted_home_goals: 1.6, predicted_away_goals: 1.2, confidence_score: 0.78,
-    },
-  },
-  {
-    id: 3,
-    match_date: new Date(Date.now() + 259200000).toISOString(),
-    home_team: { name: 'Manchester City', logo: 'https://media.api-sports.io/football/teams/50.png' },
-    away_team: { name: 'Tottenham', logo: 'https://media.api-sports.io/football/teams/47.png' },
-    league: { name: 'Premier League', logo: 'https://media.api-sports.io/football/leagues/39.png' },
-    prediction: {
-      home_win_prob: 0.62, draw_prob: 0.22, away_win_prob: 0.16,
-      over_2_5_prob: 0.72, btts_yes_prob: 0.55,
-      predicted_home_goals: 2.4, predicted_away_goals: 0.9, confidence_score: 0.85,
-    },
-  },
-  {
-    id: 4,
-    match_date: new Date(Date.now() + 345600000).toISOString(),
-    home_team: { name: 'Arsenal', logo: 'https://media.api-sports.io/football/teams/42.png' },
-    away_team: { name: 'Brighton', logo: 'https://media.api-sports.io/football/teams/51.png' },
-    league: { name: 'Premier League', logo: 'https://media.api-sports.io/football/leagues/39.png' },
-    prediction: {
-      home_win_prob: 0.58, draw_prob: 0.25, away_win_prob: 0.17,
-      over_2_5_prob: 0.60, btts_yes_prob: 0.52,
-      predicted_home_goals: 1.9, predicted_away_goals: 0.8, confidence_score: 0.80,
-    },
-  },
-  {
-    id: 5,
-    match_date: new Date(Date.now() + 432000000).toISOString(),
-    home_team: { name: 'Leeds United', logo: 'https://media.api-sports.io/football/teams/63.png' },
-    away_team: { name: 'Sunderland', logo: 'https://media.api-sports.io/football/teams/71.png' },
-    league: { name: 'Championship', logo: 'https://media.api-sports.io/football/leagues/40.png' },
-    prediction: {
-      home_win_prob: 0.48, draw_prob: 0.26, away_win_prob: 0.26,
-      over_2_5_prob: 0.52, btts_yes_prob: 0.55,
-      predicted_home_goals: 1.5, predicted_away_goals: 1.1, confidence_score: 0.71,
-    },
-  },
-];
-
-function PredictionRow({ data }: { data: PredictionData }) {
-  const { prediction } = data;
   const maxProb = Math.max(prediction.home_win_prob, prediction.draw_prob, prediction.away_win_prob);
   
   const getPredictedResult = () => {
@@ -102,17 +33,21 @@ function PredictionRow({ data }: { data: PredictionData }) {
     <tr className="group">
       <td className="py-4 px-4">
         <div className="flex items-center gap-2">
-          <Image src={data.league.logo} alt="" width={20} height={20} className="rounded" />
-          <span className="text-xs text-[var(--text-muted)]">{data.league.name}</span>
+          {match.league?.logo && (
+            <Image src={match.league.logo} alt="" width={20} height={20} className="rounded" />
+          )}
+          <span className="text-xs text-[var(--text-muted)]">{match.league?.name}</span>
         </div>
         <p className="text-xs text-[var(--text-muted)] mt-1">
-          {format(new Date(data.match_date), 'MMM d, HH:mm')}
+          {format(new Date(match.match_date), 'MMM d, HH:mm')}
         </p>
       </td>
       <td className="py-4 px-4">
         <div className="flex items-center gap-2">
-          <Image src={data.home_team.logo} alt="" width={24} height={24} />
-          <span className="font-medium text-white">{data.home_team.name}</span>
+          {match.home_team?.logo && (
+            <Image src={match.home_team.logo} alt="" width={24} height={24} />
+          )}
+          <span className="font-medium text-white">{match.home_team?.name}</span>
         </div>
       </td>
       <td className="py-4 px-4 text-center">
@@ -120,8 +55,10 @@ function PredictionRow({ data }: { data: PredictionData }) {
       </td>
       <td className="py-4 px-4">
         <div className="flex items-center gap-2 justify-end">
-          <span className="font-medium text-white">{data.away_team.name}</span>
-          <Image src={data.away_team.logo} alt="" width={24} height={24} />
+          <span className="font-medium text-white">{match.away_team?.name}</span>
+          {match.away_team?.logo && (
+            <Image src={match.away_team.logo} alt="" width={24} height={24} />
+          )}
         </div>
       </td>
       <td className="py-4 px-4">
@@ -193,14 +130,38 @@ function PredictionRow({ data }: { data: PredictionData }) {
 }
 
 export default function PredictionsPage() {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [matches, setMatches] = useState<MatchWithTeams[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsLoaded(true);
+    const fetchPredictions = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch('/api/fixtures?limit=50');
+        const data = await response.json();
+        
+        if (data.success) {
+          // Filter to only show matches with predictions
+          const matchesWithPredictions = data.fixtures.filter(
+            (m: MatchWithTeams) => m.prediction
+          );
+          setMatches(matchesWithPredictions);
+        } else {
+          setError(data.error);
+        }
+      } catch (err) {
+        setError('Failed to fetch predictions');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPredictions();
   }, []);
 
   return (
-    <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${isLoaded ? 'animate-fade-in-up' : 'opacity-0'}`}>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-up">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-display font-bold text-white flex items-center gap-3">
@@ -245,53 +206,88 @@ export default function PredictionsPage() {
         </div>
         <div className="card p-4 text-center">
           <Target className="w-6 h-6 text-[var(--accent-danger)] mx-auto mb-2" />
-          <p className="text-2xl font-display font-bold text-white">1,247</p>
-          <p className="text-xs text-[var(--text-muted)]">Matches Analyzed</p>
+          <p className="text-2xl font-display font-bold text-white">{matches.length}</p>
+          <p className="text-xs text-[var(--text-muted)]">Predictions</p>
         </div>
       </div>
+
+      {/* Error State */}
+      {error && (
+        <div className="card p-6 mb-8 border-[var(--accent-danger)]/30 bg-[var(--accent-danger)]/5">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-[var(--accent-danger)]" />
+            <p className="text-[var(--text-secondary)]">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-16">
+          <RefreshCw className="w-12 h-12 text-[var(--accent-primary)] animate-spin" />
+        </div>
+      )}
 
       {/* Predictions Table */}
-      <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Match</th>
-                <th>Home</th>
-                <th></th>
-                <th className="text-right">Away</th>
-                <th className="text-center">1X2 Probability</th>
-                <th className="text-center">xG</th>
-                <th className="text-center">O2.5</th>
-                <th className="text-center">BTTS</th>
-                <th className="text-center">Confidence</th>
-                <th className="text-center">Tip</th>
-              </tr>
-            </thead>
-            <tbody>
-              {DEMO_PREDICTIONS.map((pred) => (
-                <PredictionRow key={pred.id} data={pred} />
-              ))}
-            </tbody>
-          </table>
+      {!isLoading && !error && matches.length > 0 && (
+        <div className="card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Match</th>
+                  <th>Home</th>
+                  <th></th>
+                  <th className="text-right">Away</th>
+                  <th className="text-center">1X2 Probability</th>
+                  <th className="text-center">xG</th>
+                  <th className="text-center">O2.5</th>
+                  <th className="text-center">BTTS</th>
+                  <th className="text-center">Confidence</th>
+                  <th className="text-center">Tip</th>
+                </tr>
+              </thead>
+              <tbody>
+                {matches.map((match) => (
+                  <PredictionRow key={match.id} match={match} />
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Empty State */}
+      {!isLoading && !error && matches.length === 0 && (
+        <div className="text-center py-16">
+          <TrendingUp className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
+          <h3 className="text-xl font-display font-bold text-white mb-2">No Predictions Yet</h3>
+          <p className="text-[var(--text-secondary)]">
+            Predictions are generated when the probability engine runs.
+          </p>
+          <p className="text-sm text-[var(--text-muted)] mt-2">
+            Trigger a sync to generate predictions for upcoming matches.
+          </p>
+        </div>
+      )}
 
       {/* Legend */}
-      <div className="mt-6 flex flex-wrap gap-6 text-xs text-[var(--text-muted)]">
-        <div className="flex items-center gap-2">
-          <span className="font-medium">1X2:</span> Home/Draw/Away probability
+      {matches.length > 0 && (
+        <div className="mt-6 flex flex-wrap gap-6 text-xs text-[var(--text-muted)]">
+          <div className="flex items-center gap-2">
+            <span className="font-medium">1X2:</span> Home/Draw/Away probability
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium">xG:</span> Expected Goals
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium">O2.5:</span> Over 2.5 goals probability
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium">BTTS:</span> Both Teams To Score probability
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="font-medium">xG:</span> Expected Goals
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="font-medium">O2.5:</span> Over 2.5 goals probability
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="font-medium">BTTS:</span> Both Teams To Score probability
-        </div>
-      </div>
+      )}
     </div>
   );
 }

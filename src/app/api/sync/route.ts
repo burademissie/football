@@ -58,19 +58,48 @@ export async function POST(request: NextRequest) {
 /**
  * GET /api/sync
  * 
- * Returns sync status and last sync information.
+ * Also triggers sync (for easy browser access).
+ * Add ?status=true to just get status without syncing.
  */
-export async function GET() {
-  // In a real app, this would query the sync_logs table
-  return NextResponse.json({
-    status: 'ready',
-    lastSync: new Date().toISOString(),
-    nextScheduledSync: new Date(Date.now() + 86400000).toISOString(),
-    supportedLeagues: [
-      { id: 39, name: 'Premier League' },
-      { id: 40, name: 'Championship' },
-      { id: 41, name: 'League One' },
-      { id: 42, name: 'League Two' },
-    ],
-  });
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  
+  // If ?status=true, just return status
+  if (searchParams.get('status') === 'true') {
+    return NextResponse.json({
+      status: 'ready',
+      lastSync: new Date().toISOString(),
+      nextScheduledSync: new Date(Date.now() + 86400000).toISOString(),
+      supportedLeagues: [
+        { id: 39, name: 'Premier League' },
+        { id: 40, name: 'Championship' },
+        { id: 41, name: 'League One' },
+        { id: 42, name: 'League Two' },
+      ],
+    });
+  }
+  
+  // Otherwise, trigger sync
+  try {
+    const syncType = searchParams.get('type') || 'full';
+    
+    let result;
+    if (syncType === 'upcoming') {
+      const days = parseInt(searchParams.get('days') || '14');
+      result = await dataSyncService.syncUpcoming(days);
+    } else {
+      result = await dataSyncService.syncAll();
+    }
+    
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('Sync error:', error);
+    return NextResponse.json(
+      { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      },
+      { status: 500 }
+    );
+  }
 }

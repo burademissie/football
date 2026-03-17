@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Navigation } from "@/components/layout/Navigation";
+import { AdminPanel } from "@/components/ui/AdminPanel";
 
 export const metadata: Metadata = {
   title: "FootyEdge | Football Betting Intelligence",
@@ -23,6 +24,7 @@ export default function RootLayout({
         <main className="min-h-screen pt-20">
           {children}
         </main>
+        <AdminPanel />
       </body>
     </html>
   );
