@@ -166,4 +166,5 @@ export interface SyncResult {
     matches: number;
   };
   errors?: string[];
+  warnings?: string[];
 }
